@@ -2,6 +2,7 @@
 
 function university_post_types() {
   register_post_type('event', array(
+    'supports' => array ( 'title', 'editor', 'comments', 'revisions', 'author', 'excerpt' ), 
     'rewrite' => array ('slug' => 'events'),
     'has_archive' => true,
     'public' => true,
