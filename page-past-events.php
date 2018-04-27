@@ -17,6 +17,7 @@ get_header(); ?>
   $today = date('Ymd');
   $pastEvents = new WP_Query( array(
     'paged' => get_query_var('paged', 1),
+    'posts_per_page' => -1,
     'post_type' => 'event',
     'orderby' => 'meta_value_num',
     'order' => 'ASC',
