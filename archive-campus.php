@@ -22,7 +22,6 @@ pageBanner(array(
         <?php echo $mapLocation['address']; ?>
       </div>
     <?php }
-    echo paginate_links();
   ?>
   </div>
 
