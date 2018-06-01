@@ -13618,6 +13618,7 @@ function () {
     this.closeButton = (0, _jquery.default)(".search-overlay__close");
     this.searchOverlay = (0, _jquery.default)(".search-overlay");
     this.events();
+    this.searchActive = false;
   } // 2. events
 
 
@@ -13626,17 +13627,35 @@ function () {
     value: function events() {
       this.openButton.on("click", this.openOverlay.bind(this));
       this.closeButton.on("click", this.closeOverlay.bind(this));
+      (0, _jquery.default)(document).on("keydown", this.keyPressDispatcher.bind(this));
     } // 3. methods (function, action...)
 
   }, {
+    key: "keyPressDispatcher",
+    value: function keyPressDispatcher(e) {
+      if (e.keyCode === 83 && !this.searchActive) {
+        // lowercase s
+        this.openOverlay();
+      }
+
+      if (e.keyCode === 27 && this.searchActive) {
+        // escape key
+        this.closeOverlay();
+      }
+    }
+  }, {
     key: "openOverlay",
     value: function openOverlay() {
+      this.searchActive = true;
       this.searchOverlay.addClass("search-overlay--active");
+      (0, _jquery.default)("body").addClass("body-no-scroll");
     }
   }, {
     key: "closeOverlay",
     value: function closeOverlay() {
+      this.searchActive = false;
       this.searchOverlay.removeClass("search-overlay--active");
+      (0, _jquery.default)("body").removeClass("body-no-scroll");
     }
   }]);
 
