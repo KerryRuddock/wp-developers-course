@@ -13614,11 +13614,16 @@ function () {
   function Search() {
     _classCallCheck(this, Search);
 
+    this.resultsDiv = (0, _jquery.default)("#search-overlay__results");
     this.openButton = (0, _jquery.default)(".js-search-trigger");
     this.closeButton = (0, _jquery.default)(".search-overlay__close");
     this.searchOverlay = (0, _jquery.default)(".search-overlay");
+    this.searchField = (0, _jquery.default)("#js-search-term");
+    this.searchFieldPrev;
+    this.searchTimer;
     this.events();
     this.searchActive = false;
+    this.spinnerActive = false;
   } // 2. events
 
 
@@ -13628,12 +13633,13 @@ function () {
       this.openButton.on("click", this.openOverlay.bind(this));
       this.closeButton.on("click", this.closeOverlay.bind(this));
       (0, _jquery.default)(document).on("keydown", this.keyPressDispatcher.bind(this));
+      this.searchField.on("keyup", this.liveSearch.bind(this));
     } // 3. methods (function, action...)
 
   }, {
     key: "keyPressDispatcher",
     value: function keyPressDispatcher(e) {
-      if (e.keyCode === 83 && !this.searchActive) {
+      if (e.keyCode === 83 && !this.searchActive && !(0, _jquery.default)("input, textarea").is(':focus')) {
         // lowercase s
         this.openOverlay();
       }
@@ -13642,6 +13648,39 @@ function () {
         // escape key
         this.closeOverlay();
       }
+    }
+  }, {
+    key: "liveSearch",
+    value: function liveSearch() {
+      if (this.searchField.val() !== this.searchFieldPrev) {
+        clearTimeout(this.searchTimer); // Display a spinner when typing in unique search criteria
+
+        if (this.searchField.val()) {
+          if (!this.spinnerActive) {
+            this.resultsDiv.html('<div class="spinner-loader"></div>');
+            this.spinnerActive = true;
+          }
+
+          this.searchTimer = setTimeout(this.getResults.bind(this), 300);
+        } else {
+          this.resultsDiv.html(''); // clear search results if search field empty
+
+          this.spinnerActive = false;
+        }
+      }
+
+      this.searchFieldPrev = this.searchField.val();
+    }
+  }, {
+    key: "getResults",
+    value: function getResults() {
+      var _this = this;
+
+      _jquery.default.getJSON('http://wp-university.local/wp-json/wp/v2/posts?search=' + this.searchField.val(), function (posts) {
+        _this.resultsDiv.html("\n        <h2 class=\"search-overlay__section-title\">General Information</h2>\n        <ul class=\"link-list min-list\">\n          ".concat(posts.map(function (item) {
+          return "<li><a href=\"".concat(item.link, "\">").concat(item.title.rendered, "</a></li>");
+        }).join(''), "\n        </ul>\n      "));
+      });
     }
   }, {
     key: "openOverlay",
