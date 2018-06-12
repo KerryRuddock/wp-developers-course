@@ -13678,12 +13678,18 @@ function () {
       var _this = this;
 
       // http GET search request, on success post(s) title(s) is/are displayed
-      _jquery.default.getJSON(universityData.root_url + '/wp-json/wp/v2/posts?search=' + this.searchField.val(), function (posts) {
-        _this.resultsDiv.html("\n        <h2 class=\"search-overlay__section-title\">General Information</h2>\n        ".concat(posts.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>', "\n          ").concat(posts.map(function (item) {
+      _jquery.default.when(_jquery.default.getJSON(universityData.root_url + '/wp-json/wp/v2/posts?search=' + this.searchField.val()), _jquery.default.getJSON(universityData.root_url + '/wp-json/wp/v2/pages?search=' + this.searchField.val())).then(function (posts, pages) {
+        console.log(posts);
+        var combinedResults = posts[0].concat(pages[0]);
+
+        _this.resultsDiv.html("\n        <h2 class=\"search-overlay__section-title\">General Information</h2>\n        ".concat(combinedResults.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>', "\n          ").concat(combinedResults.map(function (item) {
           return "<li><a href=\"".concat(item.link, "\">").concat(item.title.rendered, "</a></li>");
-        }).join(''), "\n        ").concat(posts.length ? '</ul>' : '', " \n      "));
+        }).join(''), "\n        ").concat(combinedResults.length ? '</ul>' : '', " \n      "));
 
         _this.spinnerActive = false;
+      }, function () {
+        // this 2nd parameter is our FailCallback when the Deferred is rejected.
+        _this.resultsDiv.html('<p>Unexpected error; Please try again. </p>');
       });
     }
   }, {

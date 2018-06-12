@@ -56,14 +56,23 @@ class Search {
   
   getResults() {
     // http GET search request, on success post(s) title(s) is/are displayed
-    $.getJSON( universityData.root_url + '/wp-json/wp/v2/posts?search=' + this.searchField.val(), posts => {
+    $.when(
+      $.getJSON( universityData.root_url + '/wp-json/wp/v2/posts?search=' + this.searchField.val() ),
+      $.getJSON( universityData.root_url + '/wp-json/wp/v2/pages?search=' + this.searchField.val() )
+    ).then( (posts, pages) => {
+      
+      var combinedResults = posts[0].concat(pages[0]);
       this.resultsDiv.html(`
         <h2 class="search-overlay__section-title">General Information</h2>
-        ${ posts.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>' }
-          ${ posts.map( item=>`<li><a href="${item.link}">${item.title.rendered}</a></li>` ).join('') }
-        ${ posts.length ? '</ul>' : '' } 
+        ${ combinedResults.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>' }
+          ${ combinedResults.map( item=>`<li><a href="${item.link}">${item.title.rendered}</a></li>` ).join('') }
+        ${ combinedResults.length ? '</ul>' : '' } 
       `);
-      this.spinnerActive = false;
+      this.spinnerActive = false;      
+      
+    }, () => {
+      // this 2nd parameter is our FailCallback when the Deferred is rejected.
+      this.resultsDiv.html('<p>Unexpected error; Please try again. </p>');
     });
   }
   
