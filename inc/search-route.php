@@ -14,7 +14,7 @@ function universitySearchResults($data) {
     'post_type' => array('post', 'page', 'professor', 'program', 'campus', 'event'),
     's' => sanitize_text_field($data['term'])
   ));
-  // initialize ports
+  // push posts that match search results into these empty containers
   $results = array(
     'generalInfo' => array(),
     'professors' => array(),
