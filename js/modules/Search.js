@@ -66,7 +66,7 @@ class Search {
         <h2 class="search-overlay__section-title">General Information</h2>
         ${ combinedResults.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>' }
           ${ combinedResults.map( item=>`<li><a href="${item.link}">${item.title.rendered}</a> 
-          ${item.type == 'post' ? `- by ? ${item.authorName}` : ``}</li>` ).join('') }
+          ${item.type == 'post' ? `- by ${item.authorName}` : ``}</li>` ).join('') }
         ${ combinedResults.length ? '</ul>' : '' } 
       `);
       this.spinnerActive = false;      
