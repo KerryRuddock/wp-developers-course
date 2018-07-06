@@ -11,13 +11,14 @@ class Search {
     this.searchField = $("#js-search-term");
     this.searchFieldPrev;
     this.searchTimer;
-    this.events();
+    this.events();  // add event handlers as soon as object is instantiated
     this.searchActive = false;
     this.spinnerActive = false;
   }
 
   // 2. events
   events() {
+    console.log("what is this: ", this);
     this.openButton.on("click", this.openOverlay.bind(this));
     this.closeButton.on("click", this.closeOverlay.bind(this));
     $(document).on("keydown", this.keyPressDispatcher.bind(this));
@@ -53,29 +54,32 @@ class Search {
     }
     this.searchFieldPrev = this.searchField.val();
   }
-  
+  // Call Custom WP REST API 
   getResults() {
-    // http GET search request, on success post(s) title(s) is/are displayed
-    $.when(
-      $.getJSON( universityData.root_url + '/wp-json/wp/v2/posts?search=' + this.searchField.val() ),
-      $.getJSON( universityData.root_url + '/wp-json/wp/v2/pages?search=' + this.searchField.val() )
-    ).then( (posts, pages) => {
-      
-      var combinedResults = posts[0].concat(pages[0]);
+    $.getJSON( universityData.root_url + '/wp-json/university/v1/search?term=' + this.searchField.val(), (results) => {
       this.resultsDiv.html(`
-        <h2 class="search-overlay__section-title">General Information</h2>
-        ${ combinedResults.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>' }
-          ${ combinedResults.map( item=>`<li><a href="${item.link}">${item.title.rendered}</a> 
-          ${item.type == 'post' ? `- by ${item.authorName}` : ``}</li>` ).join('') }
-        ${ combinedResults.length ? '</ul>' : '' } 
+        <div class="row">
+          <div class="one-third">
+            <h2 class="search-overlay__section-title">General Information</h2>
+            ${ results.generalInfo.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>' }
+            ${ results.generalInfo.map( item=>`<li><a href="${item.permalink}">${item.title}</a> 
+            ${item.type == 'post' ? `- by ${item.authorName}` : ``}</li>` ).join('') }
+            ${ results.generalInfo.length ? '</ul>' : '' } 
+          </div>
+          <div class="one-third">
+            <h2 class="search-overlay__section-title">Programs</h2>
+            
+            <h2 class="search-overlay__section-title">Professors</h2>
+          </div>
+          <div class="one-third">
+            <h2 class="search-overlay__section-title">Campuses</h2>
+            
+            <h2 class="search-overlay__section-title">Events</h2>
+          </div>
+        </div>
       `);
-      this.spinnerActive = false;      
-      
-    }, () => {
-      // this 2nd parameter is our FailCallback when the Deferred is rejected.
-      this.resultsDiv.html('<p>Unexpected error; Please try again. </p>');
-    });
-  }
+    }); // end $.getJSON CB function
+  } // end getResults
   
   openOverlay() {
     this.searchActive = true;
@@ -91,7 +95,7 @@ class Search {
     this.searchOverlay.removeClass("search-overlay--active");
     $("body").removeClass("body-no-scroll");
   }
-  
+  // add SearchHTML CODE originally in footer.php
   addSearchHTML() {
     $("body").append(`
       <div class="search-overlay">
@@ -112,4 +116,4 @@ class Search {
   }
 }
 
-export default Search;
+export default Search;  // make Search Class available to other programs. ie. scripts.js

@@ -13622,7 +13622,8 @@ function () {
     this.searchField = (0, _jquery.default)("#js-search-term");
     this.searchFieldPrev;
     this.searchTimer;
-    this.events();
+    this.events(); // add event handlers as soon as object is instantiated
+
     this.searchActive = false;
     this.spinnerActive = false;
   } // 2. events
@@ -13631,6 +13632,7 @@ function () {
   _createClass(Search, [{
     key: "events",
     value: function events() {
+      console.log("what is this: ", this);
       this.openButton.on("click", this.openOverlay.bind(this));
       this.closeButton.on("click", this.closeOverlay.bind(this));
       (0, _jquery.default)(document).on("keydown", this.keyPressDispatcher.bind(this));
@@ -13671,26 +13673,21 @@ function () {
       }
 
       this.searchFieldPrev = this.searchField.val();
-    }
+    } // Call Custom WP REST API 
+
   }, {
     key: "getResults",
     value: function getResults() {
       var _this = this;
 
-      // http GET search request, on success post(s) title(s) is/are displayed
-      _jquery.default.when(_jquery.default.getJSON(universityData.root_url + '/wp-json/wp/v2/posts?search=' + this.searchField.val()), _jquery.default.getJSON(universityData.root_url + '/wp-json/wp/v2/pages?search=' + this.searchField.val())).then(function (posts, pages) {
-        var combinedResults = posts[0].concat(pages[0]);
+      _jquery.default.getJSON(universityData.root_url + '/wp-json/university/v1/search?term=' + this.searchField.val(), function (results) {
+        _this.resultsDiv.html("\n        <div class=\"row\">\n          <div class=\"one-third\">\n            <h2 class=\"search-overlay__section-title\">General Information</h2>\n            ".concat(results.generalInfo.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>', "\n            ").concat(results.generalInfo.map(function (item) {
+          return "<li><a href=\"".concat(item.permalink, "\">").concat(item.title, "</a> \n            ").concat(item.type == 'post' ? "- by ".concat(item.authorName) : "", "</li>");
+        }).join(''), "\n            ").concat(results.generalInfo.length ? '</ul>' : '', " \n          </div>\n          <div class=\"one-third\">\n            <h2 class=\"search-overlay__section-title\">Programs</h2>\n            \n            <h2 class=\"search-overlay__section-title\">Professors</h2>\n          </div>\n          <div class=\"one-third\">\n            <h2 class=\"search-overlay__section-title\">Campuses</h2>\n            \n            <h2 class=\"search-overlay__section-title\">Events</h2>\n          </div>\n        </div>\n      "));
+      }); // end $.getJSON CB function
 
-        _this.resultsDiv.html("\n        <h2 class=\"search-overlay__section-title\">General Information</h2>\n        ".concat(combinedResults.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>', "\n          ").concat(combinedResults.map(function (item) {
-          return "<li><a href=\"".concat(item.link, "\">").concat(item.title.rendered, "</a> \n          ").concat(item.type == 'post' ? "- by ".concat(item.authorName) : "", "</li>");
-        }).join(''), "\n        ").concat(combinedResults.length ? '</ul>' : '', " \n      "));
+    } // end getResults
 
-        _this.spinnerActive = false;
-      }, function () {
-        // this 2nd parameter is our FailCallback when the Deferred is rejected.
-        _this.resultsDiv.html('<p>Unexpected error; Please try again. </p>');
-      });
-    }
   }, {
     key: "openOverlay",
     value: function openOverlay() {
@@ -13711,7 +13708,8 @@ function () {
       this.searchActive = false;
       this.searchOverlay.removeClass("search-overlay--active");
       (0, _jquery.default)("body").removeClass("body-no-scroll");
-    }
+    } // add SearchHTML CODE originally in footer.php
+
   }, {
     key: "addSearchHTML",
     value: function addSearchHTML() {
@@ -13722,7 +13720,8 @@ function () {
   return Search;
 }();
 
-var _default = Search;
+var _default = Search; // make Search Class available to other programs. ie. scripts.js
+
 exports.default = _default;
 
 /***/ })
