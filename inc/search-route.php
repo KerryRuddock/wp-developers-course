@@ -14,7 +14,7 @@ function universitySearchResults($data) {
     'post_type' => array('post', 'page', 'professor', 'program', 'campus', 'event'),
     's' => sanitize_text_field($data['term'])
   ));
-  // push posts that match search results into these empty containers
+  // push posts that match search results into these empty containersgit 
   $results = array(
     'generalInfo' => array(),
     'professors' => array(),
@@ -29,7 +29,9 @@ function universitySearchResults($data) {
     if ( get_post_type() == 'post' OR get_post_type() == 'page' ) {
       array_push( $results['generalInfo'], array(
         'title' => get_the_title(),
-        'permalink' => get_the_permalink()
+        'permalink' => get_the_permalink(),
+        'postType' => get_post_type(),
+        'authorName' => get_the_author()       
       ));
     }
     

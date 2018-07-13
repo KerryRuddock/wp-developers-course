@@ -3,7 +3,7 @@ import $ from 'jquery';
 class Search {
   // 1. describe and create/initiate our object
   constructor() {
-    this.addSearchHTML();
+    this.addSearchHTML();  // dynamically add HTML elements, class .search-overlay's visibility is hidden
     this.resultsDiv = $("#search-overlay__results");
     this.openButton = $(".js-search-trigger");
     this.closeButton = $(".search-overlay__close");
@@ -37,12 +37,16 @@ class Search {
   }
   
   liveSearch(){
+    // Each new keystroke resets the searchTimer and keeps the Spinner displayed 
+    // Any pause in typing produces a call getResults() which uses our custom 
+    // WP REST API to obtain the results the user searches for.
     if ( this.searchField.val() !== this.searchFieldPrev ) {
       clearTimeout(this.searchTimer);
       
-      // Display a spinner when typing in unique search criteria
+      // Display a spinner while searchField criteria is being typed in.
       if (this.searchField.val()) {
         if ( !this.spinnerActive ) {
+          // display spinner
           this.resultsDiv.html('<div class="spinner-loader"></div>');
           this.spinnerActive = true;
         }
@@ -54,30 +58,42 @@ class Search {
     }
     this.searchFieldPrev = this.searchField.val();
   }
-  // Call Custom WP REST API 
+  // Call Custom WP REST API -- server sends JSON data to results parameter
   getResults() {
     $.getJSON( universityData.root_url + '/wp-json/university/v1/search?term=' + this.searchField.val(), (results) => {
       this.resultsDiv.html(`
         <div class="row">
           <div class="one-third">
             <h2 class="search-overlay__section-title">General Information</h2>
-            ${ results.generalInfo.length ? '<ul class="link-list min-list">' : '<p>No Search Results found</p>' }
+            ${ results.generalInfo.length ? '<ul class="link-list min-list">' : '<p>No General Information matches that search</p>' }
             ${ results.generalInfo.map( item=>`<li><a href="${item.permalink}">${item.title}</a> 
-            ${item.type == 'post' ? `- by ${item.authorName}` : ``}</li>` ).join('') }
+              ${ item.postType == 'post' ? `- by ${item.authorName}` : ``}</li>` ).join('') }
             ${ results.generalInfo.length ? '</ul>' : '' } 
           </div>
+          
           <div class="one-third">
             <h2 class="search-overlay__section-title">Programs</h2>
+            ${ results.programs.length ? '<ul class="link-list min-list">' : `<p>No Programs match that search. <a href="${universityData.root_url}/programs">View all programs</a></p>` }
+            ${ results.programs.map( item=>`<li><a href="${item.permalink}">${item.title}</a></li>` ).join('') }
+            ${ results.programs.length ? '</ul>' : '' }
             
             <h2 class="search-overlay__section-title">Professors</h2>
           </div>
+          
           <div class="one-third">
             <h2 class="search-overlay__section-title">Campuses</h2>
+            ${ results.campuses.length ? '<ul class="link-list min-list">' : `<p>No Campuses match that search. <a href="${universityData.root_url}/campuses">View all campuses</a></p>` }
+            ${ results.campuses.map( item=>`<li><a href="${item.permalink}">${item.title}</a></li>` ).join('') }
+            ${ results.campuses.length ? '</ul>' : '' }
             
             <h2 class="search-overlay__section-title">Events</h2>
+            ${ results.events.length ? '<ul class="link-list min-list">' : '<p>No Events match that Search</p>' }
+            ${ results.events.map( item=>`<li><a href="${item.permalink}">${item.title}</a></li>` ).join('') }
+            ${ results.events.length ? '</ul>' : '' }              
           </div>
         </div>
-      `);
+      `); // end resultsDiv.html
+      this.spinnerActive = false;
     }); // end $.getJSON CB function
   } // end getResults
   
@@ -87,7 +103,7 @@ class Search {
     $("body").addClass("body-no-scroll");
     this.searchField.val('');
     this.resultsDiv.html('');
-    setTimeout( ()=> this.searchField.focus(), 301 );
+    setTimeout( ()=> this.searchField.focus(), 301 ); // wait for fade-in to complete before focusing in searchField
   }
 
   closeOverlay() {
