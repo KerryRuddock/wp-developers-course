@@ -1925,8 +1925,8 @@ body.admin-bar .search-overlay {
 }
 
 .search-overlay .professor-card {
-    width: 180px;
-  }
+    width: 150px; /* was 180px kbr*/
+}
 
 .professor-card__image {
     display: block;
