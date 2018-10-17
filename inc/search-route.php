@@ -94,7 +94,7 @@ function universitySearchResults($data) {
     // Professors : eCourse used $programRelationshipQuery. not $professorRelatedPrograms
     $professorRelatedPrograms = new WP_Query( array(
       'posts_per_page' => -1,
-      'post_type' => 'professor',
+      'post_type' => array('professor', 'event'),
       'orderby' => 'title',
       'order' => 'ASC',
       'meta_query' => $programsMetaQuery
@@ -103,19 +103,38 @@ function universitySearchResults($data) {
     while($professorRelatedPrograms->have_posts()){
       $professorRelatedPrograms->the_post();
       
+      if ( get_post_type() == 'event' ) {
+        $eventDate = new DateTime( get_field('event_date'));
+        $description = null;
+        if( has_excerpt() ){
+          $description = get_the_excerpt();
+        } else {
+          $description = wp_trim_words( get_the_content(), 18);
+        }  
+
+        array_push( $results['events'], array(
+          'title' => get_the_title(),
+          'permalink' => get_the_permalink(),
+          'month' => $eventDate->format('M'),
+          'day' => $eventDate->format('d'),
+          'description' => $description
+        ));     
+      }
+      
       if ( get_post_type() == 'professor'  ) {
         array_push( $results['professors'], array(
           'title' => get_the_title(),
           'permalink' => get_the_permalink(),
           'image' => get_the_post_thumbnail_url(0,'professorLandscape')
         ));
-      }    
+      } 
+      
     }//end while $professorRelatedPrograms
     
-    // Because we run 2 wp_queries, we may have duplicate professor results (1 for main, 1 for professors)
+    // Because we run 2 wp_queries, we may have duplicate results (1 for main, 1 for events, professors)
     // Remove any duplicate results here.
-    $results['professors'] = array_values(array_unique($results['professors'], SORT_REGULAR));
-    
+    $results['events'] = array_values(array_unique($results['events'], SORT_REGULAR));
+    $results['professors'] = array_values(array_unique($results['professors'], SORT_REGULAR));    
   } // end if results['programs']
   
   return $results;
