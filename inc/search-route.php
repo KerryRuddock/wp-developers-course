@@ -14,7 +14,7 @@ function universitySearchResults($data) {
     'post_type' => array('post', 'page', 'professor', 'program', 'campus', 'event'),
     's' => sanitize_text_field($data['term'])
   ));
-  // push posts that match search results into these empty containersgit 
+  // push posts that match search results into these empty containers 
   $results = array(
     'generalInfo' => array(),
     'professors' => array(),
@@ -46,7 +46,8 @@ function universitySearchResults($data) {
     if ( get_post_type() == 'program' ) {
       array_push( $results['programs'], array(
         'title' => get_the_title(),
-        'permalink' => get_the_permalink()
+        'permalink' => get_the_permalink(),
+        'id' => get_the_id()
       ));
     }
 
@@ -54,6 +55,7 @@ function universitySearchResults($data) {
       array_push( $results['campuses'], array(
         'title' => get_the_title(),
         'permalink' => get_the_permalink(),
+        'id' => get_the_id()
       ));
     }
 
@@ -74,8 +76,49 @@ function universitySearchResults($data) {
         'description' => $description
       ));
     }    
-  }
+  } // end while $mainQuery
+
+  if ( $results['programs'] ) {
+    
+     //Build meta_query array for $professorRelatedPrograms Query
+    $programsMetaQuery = array('relation' => 'OR');
+    
+    foreach($results['programs'] as $item ){
+      array_push( $programsMetaQuery, array(
+        'key' => 'related_programs',  // Custom Field within Professor PostType.
+        'compare' => 'LIKE',
+        'value' => '"' . $item['id'] . '"'
+      ));
+    }
+    
+    // Professors : eCourse used $programRelationshipQuery. not $professorRelatedPrograms
+    $professorRelatedPrograms = new WP_Query( array(
+      'posts_per_page' => -1,
+      'post_type' => 'professor',
+      'orderby' => 'title',
+      'order' => 'ASC',
+      'meta_query' => $programsMetaQuery
+    ));
+    
+    while($professorRelatedPrograms->have_posts()){
+      $professorRelatedPrograms->the_post();
+      
+      if ( get_post_type() == 'professor'  ) {
+        array_push( $results['professors'], array(
+          'title' => get_the_title(),
+          'permalink' => get_the_permalink(),
+          'image' => get_the_post_thumbnail_url(0,'professorLandscape')
+        ));
+      }    
+    }//end while $professorRelatedPrograms
+    
+    // Because we run 2 wp_queries, we may have duplicate professor results (1 for main, 1 for professors)
+    // Remove any duplicate results here.
+    $results['professors'] = array_values(array_unique($results['professors'], SORT_REGULAR));
+    
+  } // end if results['programs']
   
   return $results;
-}
+  
+} // end function: universitySearchResults
 

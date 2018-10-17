@@ -35,7 +35,7 @@ function university_post_types() {
   
   // Program post type
   register_post_type('program', array(
-    'supports' => array ( 'title', 'editor', 'comments', 'revisions', 'author' ), 
+    'supports' => array ( 'title', 'comments', 'revisions', 'author' ), 
     'rewrite' => array ('slug' => 'programs'),
     'has_archive' => true,
     'public' => true,
