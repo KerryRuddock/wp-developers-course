@@ -44,6 +44,16 @@ function universitySearchResults($data) {
     }
     
     if ( get_post_type() == 'program' ) {
+      $relatedCampuses = get_field('related_campus');
+      
+      if ( $relatedCampuses ) {
+        foreach( $relatedCampuses as $campus ){
+          array_push( $results['campuses'], array(
+            'title' => get_the_title($campus),
+            'permalink' => get_the_permalink($campus)
+          ));
+        }
+      }
       array_push( $results['programs'], array(
         'title' => get_the_title(),
         'permalink' => get_the_permalink(),
@@ -83,7 +93,7 @@ function universitySearchResults($data) {
      //Build meta_query array for $professorRelatedPrograms Query
     $programsMetaQuery = array('relation' => 'OR');
     
-    foreach($results['programs'] as $item ){
+    foreach( $results['programs'] as $item ){
       array_push( $programsMetaQuery, array(
         'key' => 'related_programs',  // Custom Field within Professor PostType.
         'compare' => 'LIKE',
@@ -100,7 +110,7 @@ function universitySearchResults($data) {
       'meta_query' => $programsMetaQuery
     ));
     
-    while($professorRelatedPrograms->have_posts()){
+    while( $professorRelatedPrograms->have_posts() ){
       $professorRelatedPrograms->the_post();
       
       if ( get_post_type() == 'event' ) {
