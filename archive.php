@@ -1,9 +1,15 @@
 <?php
-
+/*
+** Archive.php handles blog posts based on meta data: Category, Author, Date, Tags, etc.
+**
+** See: https://developer.wordpress.org/themes/template-files-section/post-template-files/#archive-php
+*/
 get_header(); 
 pageBanner( array(
   'title' => get_the_archive_title(),
-  'subtitle' => get_the_archive_description()
+  'subtitle' => get_the_archive_description(),
+  'bgImage' => get_theme_file_uri('/images/outerspace.jpg')
+
 ));
 ?>
 

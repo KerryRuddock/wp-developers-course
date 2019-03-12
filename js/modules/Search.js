@@ -126,6 +126,7 @@ class Search {
     this.searchField.val('');
     this.resultsDiv.html('');
     setTimeout( ()=> this.searchField.focus(), 301 ); // wait for fade-in to complete before focusing in searchField
+    return false;  // prevents default behavior of anchor elements
   }
 
   closeOverlay() {
